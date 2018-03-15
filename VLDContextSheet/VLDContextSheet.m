@@ -7,6 +7,7 @@
 
 #import "VLDContextSheetItemView.h"
 #import "VLDContextSheet.h"
+#import "VLDContextSheetItem.h"
 
 typedef struct {
     CGRect rect;
@@ -38,6 +39,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 @property (strong, nonatomic) NSArray *itemViews;
 @property (strong, nonatomic) UIView *centerView;
 @property (strong, nonatomic) UIView *backgroundView;
+@property (strong, nonatomic) UILabel *selectedItemTitleLabel; // displays the selected sheet item label
 @property (strong, nonatomic) VLDContextSheetItemView *selectedItemView;
 @property (assign, nonatomic) BOOL openAnimationFinished;
 @property (assign, nonatomic) CGPoint touchCenter;
@@ -77,22 +79,47 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     [self.starterGestureRecognizer removeTarget: self action: @selector(gestureRecognizedStateObserver:)];
 }
 
+-(void)setSelectedItemView:(VLDContextSheetItemView *)selectedItemView
+{
+    _selectedItemView = selectedItemView;
+    _selectedItemTitleLabel.text = selectedItemView.item.title;
+    [self setNeedsLayout];
+}
+
 - (void) createSubviews {
-    _backgroundView = [[UIView alloc] initWithFrame: CGRectZero];
-    _backgroundView.backgroundColor = [UIColor colorWithWhite: 0 alpha: 0.6];
+//    if (!UIAccessibilityIsReduceTransparencyEnabled()) {
+    //        UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleProminent]; // UIBlurEffectStyleDark, UIBlurEffectStyleLight, UIBlurEffectStyleExtraLight, UIBlurEffectStyleRegular, UIBlurEffectStyleProminent are all too strong :(
+//        _backgroundView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+//    }
+//    else {
+        _backgroundView = [[UIView alloc] initWithFrame: CGRectZero];
+        _backgroundView.backgroundColor = [UIColor colorWithWhite: 0 alpha: 0.7];
+//    }
     [self addSubview: self.backgroundView];
+    
+    _selectedItemTitleLabel = [[UILabel alloc] init];
+    _selectedItemTitleLabel.clipsToBounds = YES;
+    _selectedItemTitleLabel.font = [UIFont boldSystemFontOfSize:18.];
+    _selectedItemTitleLabel.numberOfLines = 2;
+    _selectedItemTitleLabel.textAlignment = NSTextAlignmentCenter;
+    _selectedItemTitleLabel.layer.cornerRadius = 7;
+    _selectedItemTitleLabel.backgroundColor = [UIColor colorWithWhite: 0.0 alpha: 0.4];
+    _selectedItemTitleLabel.textColor = [UIColor whiteColor];
+    _selectedItemTitleLabel.alpha = 0.0;
+    [self addSubview:_selectedItemTitleLabel];
     
     _itemViews = [[NSMutableArray alloc] init];
     
     for(VLDContextSheetItem *item in _items) {
         VLDContextSheetItemView *itemView = [[VLDContextSheetItemView alloc] initWithFrame:CGRectMake(0, 0, self.itemSize.width, self.itemSize.height)];
+        itemView.titleLabelIsHidden = YES; // use global, big selectedItemTitleLabel instead of per item labels.
         itemView.item = item;
         
         [self addSubview: itemView];
         [(NSMutableArray *) _itemViews addObject: itemView];
     }
     
-    VLDContextSheetItemView *sampleItemView = _itemViews[0];
+    //VLDContextSheetItemView *sampleItemView = _itemViews[0];
 
     CGFloat circleDiameter = MIN(self.itemSize.width, self.itemSize.height);
 
@@ -108,6 +135,13 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     [super layoutSubviews];
         
     self.backgroundView.frame = self.bounds;
+    self.selectedItemTitleLabel.preferredMaxLayoutWidth = self.bounds.size.width - 2*10; // 10pt for padding left and right
+    
+    if(self.selectedItemTitleLabel.text.length > 0) {
+        CGSize selectedItemTitleLabelSize = self.selectedItemTitleLabel.intrinsicContentSize;
+        selectedItemTitleLabelSize = CGSizeMake(selectedItemTitleLabelSize.width+2*5, selectedItemTitleLabelSize.height+2*4); // 10pt for padding left and right, 8pt for padding top and bottom
+        self.selectedItemTitleLabel.frame = CGRectMake((self.frame.size.width - selectedItemTitleLabelSize.width) / 2., 20., selectedItemTitleLabelSize.width, selectedItemTitleLabelSize.height);
+    }
 }
 
 - (void) setCenterViewHighlighted: (BOOL) highlighted {
@@ -194,6 +228,8 @@ static CGFloat VLDVectorLength(CGPoint vector) {
         itemView.transform = CGAffineTransformIdentity;
         itemView.center = self.touchCenter;
         [itemView setHighlighted: NO animated: NO];
+        
+        self.selectedItemTitleLabel.alpha = 0.;
         
         [UIView animateWithDuration: 0.5
                               delay: i * 0.01
@@ -320,6 +356,14 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     if(touchDistance > self.radius + VLDMaxTouchDistanceAllowance) {
         [itemView setHighlighted: NO animated: YES];
         
+        [UIView animateWithDuration: 0.3
+                              delay: 0.0
+                            options: UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                             self.selectedItemTitleLabel.alpha = 0.;
+                         }
+                         completion: nil];
+        
         [self updateItemView: itemView
                touchDistance: 0.0
                     animated: YES];
@@ -331,6 +375,14 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     
     if(itemView != self.selectedItemView) {
         [self.selectedItemView setHighlighted: NO animated: YES];
+        
+        [UIView animateWithDuration: 0.3
+                              delay: 0.0
+                            options: UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                             self.selectedItemTitleLabel.alpha = 0.;
+                         }
+                         completion: nil];
         
         [self updateItemView: self.selectedItemView
                touchDistance: 0.0
@@ -350,6 +402,15 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     
     if(fabs(touchDistance) > VLDMaxTouchDistanceAllowance) {
         [itemView setHighlighted: YES animated: YES];
+        
+        [UIView animateWithDuration: 0.3
+                              delay: 0.0
+                            options: UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                             self.selectedItemTitleLabel.alpha = 1.;
+                         }
+                         completion: nil];
+
     }
     
     self.selectedItemView = itemView;

@@ -5,7 +5,7 @@
 //  Copyright (c) 2014 Vladimir Angelov. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+@import UIKit;
 
 @class VLDContextSheetItem;
 
@@ -13,6 +13,7 @@
 
 @property (strong, nonatomic) VLDContextSheetItem *item;
 @property (readonly) BOOL isHighlighted;
+@property (assign, nonatomic) BOOL titleLabelIsHidden; // NO by default
 
 - (void) setHighlighted: (BOOL) highlighted animated: (BOOL) animated;
 

@@ -80,6 +80,20 @@ static const NSInteger VLDTextPadding = 5;
 }
 
 - (void) updateLabelText {
+    
+    // to use 2 lines
+    // add a property @property (assign) CGFloat labelHeight;
+    // and in layoutSubviews, change the hardcoded value 14. by self.labelHeight
+    //    self.label.text = self.item.title;
+    //    self.label.numberOfLines = 2;
+    //    self.label.preferredMaxLayoutWidth = self.frame.size.width;
+    //    CGSize fittingSize = [self.label intrinsicContentSize];
+    //    self.labelHeight = fittingSize.height;
+    //    self.labelWidth = 2 * VLDTextPadding + ceil(fittingSize.width);
+    //
+    //    [self setNeedsDisplay];
+
+    // on one line only:
     self.label.text = self.item.title;
     self.labelWidth = 2 * VLDTextPadding + ceil([self.label.text sizeWithAttributes: @{ NSFontAttributeName: self.label.font }].width);
     [self setNeedsDisplay];
@@ -98,13 +112,20 @@ static const NSInteger VLDTextPadding = 5;
                      animations:^{
                          self.highlightedImageView.alpha = (highlighted ? 1.0 : 0.0);
                          self.imageView.alpha = 1 - self.highlightedImageView.alpha;
-                         self.label.alpha = self.highlightedImageView.alpha;
+                         if(self.titleLabelIsHidden == NO) {
+                             self.label.alpha = self.highlightedImageView.alpha;
+                         }
                          
                      }
                      completion: nil];
-    
-    
-    
+}
+
+-(void)setTitleLabelIsHidden:(BOOL)titleLabelIsHidden
+{
+    _titleLabelIsHidden = titleLabelIsHidden;
+    if(_titleLabelIsHidden == NO && self.isHighlighted) {
+        [self setHighlighted:self.isHighlighted animated:NO];
+    }
 }
 
 @end
