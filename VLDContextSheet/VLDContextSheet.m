@@ -83,6 +83,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 {
     _selectedItemView = selectedItemView;
     _selectedItemTitleLabel.text = selectedItemView.item.title;
+    _selectedItemTitleLabel.textColor = selectedItemView.item.isEnabled ? [UIColor whiteColor] : [UIColor colorWithWhite:0.5 alpha:1];
     [self setNeedsLayout];
 }
 
@@ -104,7 +105,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     _selectedItemTitleLabel.textAlignment = NSTextAlignmentCenter;
     _selectedItemTitleLabel.layer.cornerRadius = 7;
     _selectedItemTitleLabel.backgroundColor = [UIColor colorWithWhite: 0.0 alpha: 0.4];
-    _selectedItemTitleLabel.textColor = [UIColor whiteColor];
+    _selectedItemTitleLabel.textColor = [UIColor whiteColor]; // lightGray when enabled==NO
     _selectedItemTitleLabel.alpha = 0.0;
     [self addSubview:_selectedItemTitleLabel];
     

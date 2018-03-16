@@ -13,9 +13,9 @@
                image: (UIImage *) image
     highlightedImage: (UIImage *) highlightedImage;
 
-@property (strong, readonly) NSString *title;
-@property (strong, readonly) UIImage *image;
-@property (strong, readonly) UIImage *highlightedImage;
+@property (strong, nonatomic) NSString *title;
+@property (strong, nonatomic) UIImage *image;
+@property (strong, nonatomic) UIImage *highlightedImage;
 
 @property (assign, readwrite, getter = isEnabled) BOOL enabled;
 
