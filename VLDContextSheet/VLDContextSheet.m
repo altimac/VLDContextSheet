@@ -101,7 +101,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     _selectedItemTitleLabel = [[UILabel alloc] init];
     _selectedItemTitleLabel.clipsToBounds = YES;
     _selectedItemTitleLabel.font = [UIFont boldSystemFontOfSize:18.];
-    _selectedItemTitleLabel.numberOfLines = 2;
+    _selectedItemTitleLabel.numberOfLines = 3;
     _selectedItemTitleLabel.textAlignment = NSTextAlignmentCenter;
     _selectedItemTitleLabel.layer.cornerRadius = 7;
     _selectedItemTitleLabel.backgroundColor = [UIColor colorWithWhite: 0.0 alpha: 0.4];
