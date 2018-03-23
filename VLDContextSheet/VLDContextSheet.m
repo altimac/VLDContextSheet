@@ -26,7 +26,7 @@ static inline VLDZone VLDZoneMake(CGRect rect, CGFloat rotation) {
     return zone;
 }
 
-static CGFloat VLDVectorDotProduct(CGPoint vector1, CGPoint vector2) {
+static CGFloat VLDVectorDotProduct(CGPoint vector1, CGPoint vector2) { // math reminder: the dot product (produit scalaire in french) is equal to: cos(alpha) * ||v1->|| * ||v2->|| but is also equal to v1.x*v2.x+v1.y*v2.y. It helps know the angle (alpha) between 2 vectors. If cos(alpha) is close to 1, it means the 2 vectors have "very near" (points to the same direction).
     return vector1.x * vector2.x + vector1.y * vector2.y;
 }
 
@@ -169,6 +169,8 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     zones[7] = VLDZoneMake(CGRectMake(zones[6].rect.origin.x + zones[6].rect.size.width, zones[5].rect.origin.y, zones[2].rect.size.width, rowHeight2), M_PI - zones[2].rotation);
     zones[8] = VLDZoneMake(CGRectMake(zones[7].rect.origin.x + zones[7].rect.size.width, zones[5].rect.origin.y, zones[3].rect.size.width, rowHeight2), M_PI - zones[3].rotation);
     zones[9] = VLDZoneMake(CGRectMake(zones[8].rect.origin.x + zones[8].rect.size.width, zones[5].rect.origin.y, zones[4].rect.size.width, rowHeight2), M_PI - zones[4].rotation);
+    
+    //[self drawZones];
 }
 
 /* Only used for testing the touch zones */
@@ -209,7 +211,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 
 - (void) updateItemViewNotAnimated: (UIView *) itemView touchDistance: (CGFloat) touchDistance  {
     NSInteger itemIndex = [self.itemViews indexOfObject: itemView];
-    CGFloat angle = -0.65 + self.rotation + itemIndex * (self.rangeAngle / self.itemViews.count);
+    CGFloat angle = /*-0.65*/M_PI_2 + self.rotation + itemIndex * (self.rangeAngle / self.itemViews.count);
     
     CGFloat resistanceFactor = 1.0 / (touchDistance > 0 ? 6.0 : 3.0);
     
@@ -299,9 +301,8 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 
 - (void) gestureRecognizedStateObserver: (UIGestureRecognizer *) gestureRecognizer {
     if(self.openAnimationFinished && gestureRecognizer.state == UIGestureRecognizerStateChanged) {
-        CGPoint touchPoint = [gestureRecognizer locationInView: self];
         
-        [self updateItemViewsForTouchPoint: touchPoint];
+        [self updateItemViewsForGestureRecognizerUpdate:gestureRecognizer];
     }
     else if(gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled) {
         if(gestureRecognizer.state == UIGestureRecognizerStateCancelled) {
@@ -330,7 +331,8 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     return touchDistance;
 }
 
-- (void) updateItemViewsForTouchPoint: (CGPoint) touchPoint {
+- (void) updateItemViewsForGestureRecognizerUpdate:(UIGestureRecognizer*)gestureRecognizer {
+    CGPoint touchPoint = [gestureRecognizer locationInView: self];
     CGPoint touchVector = {touchPoint.x - self.touchCenter.x, touchPoint.y - self.touchCenter.y};
     VLDContextSheetItemView *itemView = [self itemViewForTouchVector: touchVector];
     CGFloat touchDistance = [self signedTouchDistanceForTouchVector: touchVector itemView: itemView];
@@ -403,6 +405,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     
     if(fabs(touchDistance) > VLDMaxTouchDistanceAllowance) {
         [itemView setHighlighted: YES animated: YES];
+        [self.delegate contextSheet:self didHighlightItemView:itemView withGestureRecognizer:gestureRecognizer];
         
         [UIView animateWithDuration: 0.3
                               delay: 0.0
@@ -428,9 +431,11 @@ static CGFloat VLDVectorLength(CGPoint vector) {
             itemView.center.y - self.touchCenter.y
         };
         
-        CGFloat cosOfAngle = VLDVectorDotProduct(itemViewVector, touchVector) / VLDVectorLength(itemViewVector);
+        // math reminder: the dot product (produit scalaire in french) is equal to: cos(alpha) * ||v1->|| * ||v2->|| but is also equal to v1.x*v2.x+v1.y*v2.y. It helps know the angle (alpha) between 2 vectors. If cos(alpha) is close to 1, it means the 2 vectors have "very near" (points to the same direction).
+        CGFloat cosOfAngle = VLDVectorDotProduct(itemViewVector, touchVector) / (VLDVectorLength(itemViewVector)*VLDVectorLength(touchVector));
         
-        if(cosOfAngle > maxCosOfAngle) {
+        // so here we basically are looking for the itemViewVector that is the "most near" touchVector.
+        if(cosOfAngle > maxCosOfAngle && cosOfAngle > 0.85) { // AH: i've added a "cosOfAngle > 0.85 filter" because I want the user to be pointing to the itemView quite correctly (itemView should only appear selected if it's correctly pointed to)
             maxCosOfAngle = cosOfAngle;
             resultItemView = itemView;
         }

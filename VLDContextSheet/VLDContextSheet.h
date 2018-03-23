@@ -9,10 +9,12 @@
 
 @class VLDContextSheet;
 @class VLDContextSheetItem;
+@class VLDContextSheetItemView;
 
 @protocol VLDContextSheetDelegate <NSObject>
 
-- (void) contextSheet: (VLDContextSheet *) contextSheet didSelectItem: (VLDContextSheetItem *) item;
+-(void)contextSheet:(VLDContextSheet *)contextSheet didHighlightItemView:(VLDContextSheetItemView*)itemView withGestureRecognizer:(UIGestureRecognizer*)gestureRecognizer; // may be sent many times, each time the gesture recognizer is updated!
+-(void)contextSheet:(VLDContextSheet *)contextSheet didSelectItem:(VLDContextSheetItem *)item;
 
 @end
 
