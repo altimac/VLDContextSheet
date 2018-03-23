@@ -13,8 +13,9 @@
 
 @protocol VLDContextSheetDelegate <NSObject>
 
--(void)contextSheet:(VLDContextSheet *)contextSheet didHighlightItemView:(VLDContextSheetItemView*)itemView withGestureRecognizer:(UIGestureRecognizer*)gestureRecognizer; // may be sent many times, each time the gesture recognizer is updated!
--(void)contextSheet:(VLDContextSheet *)contextSheet didSelectItem:(VLDContextSheetItem *)item;
+-(void)contextSheet:(VLDContextSheet *)contextSheet didHighlightItemView:(VLDContextSheetItemView*)itemView withGestureRecognizer:(UIGestureRecognizer*)gestureRecognizer; // will/may be sent many times, each time the gesture recognizer is updated!
+-(void)contextSheet:(VLDContextSheet *)contextSheet didSelectItemView:(VLDContextSheetItemView*)itemView;
+-(void)contextSheetDidCancel:(VLDContextSheet *)contextSheet;
 
 @end
 
@@ -26,7 +27,7 @@
 @property (assign, nonatomic) CGSize itemSize;
 @property (strong, nonatomic) NSArray *items;
 @property (assign, nonatomic) id<VLDContextSheetDelegate> delegate;
-@property (copy, nonatomic) void (^didSelectItemHandler)(VLDContextSheetItem *item);
+@property (copy, nonatomic) void (^didSelectItemViewHandler)(VLDContextSheetItemView *itemView);
 
 - (id) initWithItems: (NSArray *) items;
 - (id) initWithItems: (NSArray *) items itemSize: (CGSize) itemSize;

@@ -304,11 +304,21 @@ static CGFloat VLDVectorLength(CGPoint vector) {
         
         [self updateItemViewsForGestureRecognizerUpdate:gestureRecognizer];
     }
-    else if(gestureRecognizer.state == UIGestureRecognizerStateEnded || gestureRecognizer.state == UIGestureRecognizerStateCancelled) {
-        if(gestureRecognizer.state == UIGestureRecognizerStateCancelled) {
-            self.selectedItemView = nil;
+    else if(gestureRecognizer.state == UIGestureRecognizerStateEnded) {
+        if(self.selectedItemView && self.selectedItemView.isHighlighted) {
+            [self.delegate contextSheet: self didSelectItemView: self.selectedItemView];
+            if (self.didSelectItemViewHandler) {
+                self.didSelectItemViewHandler(self.selectedItemView);
+            }
         }
-        
+        else { // user lift finger outside of an item, so he wants to cancel
+            [self.delegate contextSheetDidCancel:self];
+            [self end];
+        }
+    }
+    else if(gestureRecognizer.state == UIGestureRecognizerStateCancelled) { // also UIGestureRecognizerStateFailed?
+        self.selectedItemView = nil;
+        [self.delegate contextSheetDidCancel:self];
         [self end];
     }
 }
@@ -446,14 +456,6 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 
 - (void) end {
     [self.starterGestureRecognizer removeTarget: self action: @selector(gestureRecognizedStateObserver:)];
-    
-    if(self.selectedItemView && self.selectedItemView.isHighlighted) {
-        [self.delegate contextSheet: self didSelectItem: self.selectedItemView.item];
-        if (self.didSelectItemHandler) {
-            self.didSelectItemHandler(self.selectedItemView.item);
-        }
-    }
-    
     [self closeItemsToCenterView];
 }
 
