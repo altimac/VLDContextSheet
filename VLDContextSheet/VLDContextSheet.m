@@ -14,7 +14,7 @@ typedef struct {
     CGFloat rotation;
 } VLDZone;
 
-static const NSInteger VLDMaxTouchDistanceAllowance = 40;
+static const NSInteger VLDMaxTouchDistanceAllowance = 60;
 static const NSInteger VLDZonesCount = 10;
 
 static inline VLDZone VLDZoneMake(CGRect rect, CGFloat rotation) {
@@ -37,9 +37,8 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 @interface VLDContextSheet ()
 
 @property (strong, nonatomic) NSArray *itemViews;
-@property (strong, nonatomic) UIView *centerView;
+//@property (strong, nonatomic) UIView *centerView;
 @property (strong, nonatomic) UIView *backgroundView;
-@property (strong, nonatomic) UILabel *selectedItemTitleLabel; // displays the selected sheet item label
 @property (strong, nonatomic) VLDContextSheetItemView *selectedItemView;
 @property (assign, nonatomic) BOOL openAnimationFinished;
 @property (assign, nonatomic) CGPoint touchCenter;
@@ -93,8 +92,9 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 //        _backgroundView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
 //    }
 //    else {
-        _backgroundView = [[UIView alloc] initWithFrame: CGRectZero];
-        _backgroundView.backgroundColor = [UIColor colorWithWhite: 0 alpha: 0.7];
+    _backgroundView = [[UIView alloc] initWithFrame: CGRectZero];
+    _backgroundView.backgroundColor = [UIColor colorWithWhite: 0 alpha: 0.7];
+    [_backgroundView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(endContextSheetByTap:)]];
 //    }
     [self addSubview: self.backgroundView];
     
@@ -119,16 +119,13 @@ static CGFloat VLDVectorLength(CGPoint vector) {
         [self addSubview: itemView];
         [(NSMutableArray *) _itemViews addObject: itemView];
     }
-    
-    //VLDContextSheetItemView *sampleItemView = _itemViews[0];
 
-    CGFloat circleDiameter = MIN(self.itemSize.width, self.itemSize.height);
-
-    _centerView = [[UIView alloc] initWithFrame: CGRectMake(0, 0, circleDiameter, circleDiameter)];
-    _centerView.layer.cornerRadius = circleDiameter / 2.0;
-    _centerView.layer.borderWidth = 2;
-    _centerView.layer.borderColor = [UIColor grayColor].CGColor;
-    [self addSubview: _centerView];
+//    CGFloat circleDiameter = MIN(self.itemSize.width, self.itemSize.height);
+//    _centerView = [[UIView alloc] initWithFrame: CGRectMake(0, 0, circleDiameter, circleDiameter)];
+//    _centerView.layer.cornerRadius = circleDiameter / 2.0;
+//    _centerView.layer.borderWidth = 2;
+//    _centerView.layer.borderColor = [UIColor grayColor].CGColor;
+//    [self addSubview: _centerView];
 
 }
 
@@ -145,9 +142,9 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     }
 }
 
-- (void) setCenterViewHighlighted: (BOOL) highlighted {
-    _centerView.backgroundColor = highlighted ? [UIColor colorWithWhite: 0.5 alpha: 0.4] : nil;
-}
+//- (void) setCenterViewHighlighted: (BOOL) highlighted {
+//    _centerView.backgroundColor = highlighted ? [UIColor colorWithWhite: 0.5 alpha: 0.4] : nil;
+//}
 
 - (void) createZones {
     CGRect screenRect = self.bounds;
@@ -193,7 +190,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
                animated: (BOOL) animated  {
     
     if(!animated) {
-        [self updateItemViewNotAnimated: itemView touchDistance: touchDistance];
+        [self updateItemView: itemView touchDistance: touchDistance];
     }
     else  {        
         [UIView animateWithDuration: 0.4
@@ -202,21 +199,20 @@ static CGFloat VLDVectorLength(CGPoint vector) {
               initialSpringVelocity: 7.5
                             options: UIViewAnimationOptionBeginFromCurrentState
                          animations: ^{
-                             [self updateItemViewNotAnimated: itemView
+                             [self updateItemView: itemView
                                                touchDistance: touchDistance];
                          }
                          completion: nil];
     }
 }
 
-- (void) updateItemViewNotAnimated: (UIView *) itemView touchDistance: (CGFloat) touchDistance  {
+- (void) updateItemView: (UIView *) itemView touchDistance: (CGFloat) touchDistance  {
     NSInteger itemIndex = [self.itemViews indexOfObject: itemView];
     CGFloat angle = /*-0.65*/M_PI_2 + self.rotation + itemIndex * (self.rangeAngle / self.itemViews.count);
     
     CGFloat resistanceFactor = 1.0 / (touchDistance > 0 ? 6.0 : 3.0);
     
-    itemView.center = CGPointMake(self.touchCenter.x + (self.radius + touchDistance * resistanceFactor) * sin(angle),
-                                  self.touchCenter.y + (self.radius + touchDistance * resistanceFactor) * cos(angle));
+    itemView.center = CGPointMake(self.touchCenter.x + (self.radius + touchDistance * resistanceFactor) * sin(angle), self.touchCenter.y + (self.radius + touchDistance * resistanceFactor) * cos(angle));
     
     CGFloat scale = 1 + 0.2 * (fabs(touchDistance) / self.radius);
     
@@ -240,7 +236,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
               initialSpringVelocity: 7.5
                             options: 0
                          animations: ^{
-                             [self updateItemViewNotAnimated: itemView touchDistance: 0.0];
+                             [self updateItemView: itemView touchDistance: 0.0];
                              
                          }
                          completion: ^(BOOL finished) {
@@ -277,10 +273,10 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     self.starterGestureRecognizer = gestureRecognizer;
     
     self.touchCenter = [self.starterGestureRecognizer locationInView: self];
-    self.centerView.center = self.touchCenter;
+    //self.centerView.center = self.touchCenter;
     self.selectedItemView = nil;
-    [self setCenterViewHighlighted: YES];
-    self.rotation = [self rotationForCenter: self.centerView.center];
+    //[self setCenterViewHighlighted: YES];
+    self.rotation = [self rotationForCenter: self.touchCenter];
     
     [self openItemsFromCenterView];
     
@@ -329,7 +325,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     CGPoint oldCenter = itemView.center;
     CGAffineTransform oldTransform = itemView.transform;
     
-    [self updateItemViewNotAnimated: itemView touchDistance: self.radius + 40];
+    [self updateItemView: itemView touchDistance: self.radius + VLDMaxTouchDistanceAllowance];
     
     if(!CGRectContainsRect(self.bounds, itemView.frame)) {
         touchDistance = -touchDistance;
@@ -347,24 +343,24 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     VLDContextSheetItemView *itemView = [self itemViewForTouchVector: touchVector];
     CGFloat touchDistance = [self signedTouchDistanceForTouchVector: touchVector itemView: itemView];
     
-    if(fabs(touchDistance) <= VLDMaxTouchDistanceAllowance) {
-        self.centerView.center = CGPointMake(self.touchCenter.x + touchVector.x, self.touchCenter.y + touchVector.y);
-        [self setCenterViewHighlighted: YES];
-    }
-    else {
-        [self setCenterViewHighlighted: NO];
-        
-        [UIView animateWithDuration: 0.4
-                              delay: 0
-             usingSpringWithDamping: 0.35
-              initialSpringVelocity: 7.5
-                            options: UIViewAnimationOptionBeginFromCurrentState
-                         animations: ^{
-                             self.centerView.center = self.touchCenter;
-                             
-                         }
-                         completion: nil];
-    }
+//    if(fabs(touchDistance) <= VLDMaxTouchDistanceAllowance) {
+//        self.centerView.center = CGPointMake(self.touchCenter.x + touchVector.x, self.touchCenter.y + touchVector.y);
+//        [self setCenterViewHighlighted: YES];
+//    }
+//    else {
+//        [self setCenterViewHighlighted: NO];
+//
+//        [UIView animateWithDuration: 0.4
+//                              delay: 0
+//             usingSpringWithDamping: 0.35
+//              initialSpringVelocity: 7.5
+//                            options: UIViewAnimationOptionBeginFromCurrentState
+//                         animations: ^{
+//                             self.centerView.center = self.touchCenter;
+//
+//                         }
+//                         completion: nil];
+//    }
     
     if(touchDistance > self.radius + VLDMaxTouchDistanceAllowance) {
         [itemView setHighlighted: NO animated: YES];
@@ -413,9 +409,11 @@ static CGFloat VLDVectorLength(CGPoint vector) {
                     animated: NO];
     }
     
-    if(fabs(touchDistance) > VLDMaxTouchDistanceAllowance) {
-        [itemView setHighlighted: YES animated: YES];
-        [self.delegate contextSheet:self didHighlightItemView:itemView withGestureRecognizer:gestureRecognizer];
+    if(itemView != nil && fabs(touchDistance) > VLDMaxTouchDistanceAllowance) {
+        if(itemView.isHighlighted == NO) {
+            [itemView setHighlighted: YES animated: YES];
+            [self.delegate contextSheet:self didHighlightItemView:itemView withGestureRecognizer:gestureRecognizer];
+        }
         
         [UIView animateWithDuration: 0.3
                               delay: 0.0
@@ -457,6 +455,12 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 - (void) end {
     [self.starterGestureRecognizer removeTarget: self action: @selector(gestureRecognizedStateObserver:)];
     [self closeItemsToCenterView];
+}
+
+-(void)endContextSheetByTap:(id)sender // user tapped in the background view, so he wants to cancel
+{
+    [self.delegate contextSheetDidCancel:self];
+    [self end];
 }
 
 @end
