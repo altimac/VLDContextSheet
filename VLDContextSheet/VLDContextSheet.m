@@ -311,14 +311,18 @@ static CGFloat VLDVectorLength(CGPoint vector) {
             }
         }
         else { // user lift finger outside of an item, so he wants to cancel
-            [self.delegate contextSheetDidCancel:self];
-            [self end];
+            BOOL canEnd = (self.delegate == nil || (self.delegate && [self.delegate contextSheetShouldCancel:self withGestureRecognizer:gestureRecognizer]));
+            if(canEnd) {
+                [self end];
+                [self.delegate contextSheetDidCancel:self];
+            }
         }
     }
     else if(gestureRecognizer.state == UIGestureRecognizerStateCancelled) { // also UIGestureRecognizerStateFailed?
         self.selectedItemView = nil;
-        [self.delegate contextSheetDidCancel:self];
+        [self.delegate contextSheetShouldCancel:self withGestureRecognizer:gestureRecognizer]; // will always cancel if gesture state is UIGestureRecognizerStateCancelled, whatever the response is!
         [self end];
+        [self.delegate contextSheetDidCancel:self];
     }
 }
 
@@ -465,14 +469,16 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     [self.starterGestureRecognizer removeTarget: self action: @selector(gestureRecognizedStateObserver:)];
     // [self.starterGestureRecognizer removeTarget:nil action:NULL]; // can be usefull to remove all targets for any action
     
-    
     [self closeItemsToCenterView];
 }
 
 -(void)endContextSheetByTap:(id)sender // user tapped in the background view, so he wants to cancel
 {
-    [self.delegate contextSheetDidCancel:self];
-    [self end];
+    BOOL canEnd = (self.delegate == nil || (self.delegate && [self.delegate contextSheetShouldCancel:self withGestureRecognizer:sender]));
+    if(canEnd) {
+        [self end];
+        [self.delegate contextSheetDidCancel:self];
+    }
 }
 
 @end
