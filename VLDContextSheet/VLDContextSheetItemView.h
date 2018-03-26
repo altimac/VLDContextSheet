@@ -12,7 +12,7 @@
 @interface VLDContextSheetItemView : UIView
 
 @property (strong, nonatomic) VLDContextSheetItem *item;
-@property (readonly) BOOL isHighlighted;
+@property (readonly, nonatomic) BOOL isHighlighted;
 @property (assign, nonatomic) BOOL titleLabelIsHidden; // NO by default
 
 - (void) setHighlighted: (BOOL) highlighted animated: (BOOL) animated;

@@ -13,7 +13,8 @@
 
 @protocol VLDContextSheetDelegate <NSObject>
 
--(void)contextSheet:(VLDContextSheet *)contextSheet didHighlightItemView:(VLDContextSheetItemView*)itemView withGestureRecognizer:(UIGestureRecognizer*)gestureRecognizer; // will/may be sent many times, each time the gesture recognizer is updated!
+-(void)contextSheet:(VLDContextSheet *)contextSheet didHighlightItemView:(VLDContextSheetItemView*)itemView withGestureRecognizer:(UIGestureRecognizer*)gestureRecognizer;
+-(void)contextSheet:(VLDContextSheet *)contextSheet willUnhighlightItemView:(VLDContextSheetItemView*)itemView withGestureRecognizer:(UIGestureRecognizer*)gestureRecognizer;
 -(void)contextSheet:(VLDContextSheet *)contextSheet didSelectItemView:(VLDContextSheetItemView*)itemView;
 -(void)contextSheetDidCancel:(VLDContextSheet *)contextSheet;
 

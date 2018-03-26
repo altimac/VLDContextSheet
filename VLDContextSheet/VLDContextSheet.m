@@ -226,6 +226,9 @@ static CGFloat VLDVectorLength(CGPoint vector) {
         VLDContextSheetItemView *itemView = self.itemViews[i];
         itemView.transform = CGAffineTransformIdentity;
         itemView.center = self.touchCenter;
+        if(itemView.isHighlighted) {
+            [self.delegate contextSheet:self willUnhighlightItemView:itemView withGestureRecognizer:self.starterGestureRecognizer];
+        }
         [itemView setHighlighted: NO animated: NO];
         
         self.selectedItemTitleLabel.alpha = 0.;
@@ -363,6 +366,9 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 //    }
     
     if(touchDistance > self.radius + VLDMaxTouchDistanceAllowance) {
+        if(itemView.isHighlighted) {
+            [self.delegate contextSheet:self willUnhighlightItemView:itemView withGestureRecognizer:gestureRecognizer];
+        }
         [itemView setHighlighted: NO animated: YES];
         
         [UIView animateWithDuration: 0.3
@@ -383,6 +389,9 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     }
     
     if(itemView != self.selectedItemView) {
+        if(self.selectedItemView && self.selectedItemView.isHighlighted) {
+            [self.delegate contextSheet:self willUnhighlightItemView:self.selectedItemView withGestureRecognizer:gestureRecognizer];
+        }
         [self.selectedItemView setHighlighted: NO animated: YES];
         
         [UIView animateWithDuration: 0.3
@@ -454,6 +463,9 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 
 - (void) end {
     [self.starterGestureRecognizer removeTarget: self action: @selector(gestureRecognizedStateObserver:)];
+    // [self.starterGestureRecognizer removeTarget:nil action:NULL]; // can be usefull to remove all targets for any action
+    
+    
     [self closeItemsToCenterView];
 }
 
