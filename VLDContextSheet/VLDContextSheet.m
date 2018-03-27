@@ -14,7 +14,7 @@ typedef struct {
     CGFloat rotation;
 } VLDZone;
 
-static const NSInteger VLDMaxTouchDistanceAllowance = 60;
+static const NSInteger VLDTouchDistanceAllowance = 60; // a distance around each item center where we consider the touch to be in the item sensitive area. Typically it defines the radius of a circle  around each item center we consider the item is targeted.
 static const NSInteger VLDZonesCount = 10;
 
 static inline VLDZone VLDZoneMake(CGRect rect, CGFloat rotation) {
@@ -209,12 +209,11 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 - (void) updateItemView: (UIView *) itemView touchDistance: (CGFloat) touchDistance  {
     NSInteger itemIndex = [self.itemViews indexOfObject: itemView];
     CGFloat angle = /*-0.65*/M_PI_2 + self.rotation + itemIndex * (self.rangeAngle / self.itemViews.count);
+    //CGFloat resistanceFactor = 1.0 / (touchDistance > 0 ? 6.0 : 3.0);
+    //itemView.center = CGPointMake(self.touchCenter.x + (self.radius + touchDistance * resistanceFactor) * sin(angle), self.touchCenter.y + (self.radius + touchDistance * resistanceFactor) * cos(angle));
+    itemView.center = CGPointMake(self.touchCenter.x + self.radius*sin(angle), self.touchCenter.y + self.radius*cos(angle));
     
-    CGFloat resistanceFactor = 1.0 / (touchDistance > 0 ? 6.0 : 3.0);
-    
-    itemView.center = CGPointMake(self.touchCenter.x + (self.radius + touchDistance * resistanceFactor) * sin(angle), self.touchCenter.y + (self.radius + touchDistance * resistanceFactor) * cos(angle));
-    
-    CGFloat scale = 1 + 0.2 * (fabs(touchDistance) / self.radius);
+    CGFloat scale = 1 + 1 * (fabs(touchDistance) / self.radius);
     
     itemView.transform = CGAffineTransformMakeScale(scale, scale);
 }
@@ -283,8 +282,19 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     
     [self openItemsFromCenterView];
     
-    [self.starterGestureRecognizer addTarget: self action: @selector(gestureRecognizedStateObserver:)];
+    [self resumeGestureRecognizerHandling];
 }
+
+- (void)pauseGestureRecognizerHandling
+{
+    [self.starterGestureRecognizer removeTarget:self action:@selector(gestureRecognizedStateObserver:)];
+}
+
+- (void)resumeGestureRecognizerHandling
+{
+    [self.starterGestureRecognizer addTarget:self action:@selector(gestureRecognizedStateObserver:)];
+}
+
 
 - (CGFloat) rotationForCenter: (CGPoint) center {
     for(NSInteger i = 0; i < VLDZonesCount; i++) {
@@ -300,7 +310,6 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 
 - (void) gestureRecognizedStateObserver: (UIGestureRecognizer *) gestureRecognizer {
     if(self.openAnimationFinished && gestureRecognizer.state == UIGestureRecognizerStateChanged) {
-        
         [self updateItemViewsForGestureRecognizerUpdate:gestureRecognizer];
     }
     else if(gestureRecognizer.state == UIGestureRecognizerStateEnded) {
@@ -332,7 +341,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     CGPoint oldCenter = itemView.center;
     CGAffineTransform oldTransform = itemView.transform;
     
-    [self updateItemView: itemView touchDistance: self.radius + VLDMaxTouchDistanceAllowance];
+    [self updateItemView: itemView touchDistance: self.radius + VLDTouchDistanceAllowance];
     
     if(!CGRectContainsRect(self.bounds, itemView.frame)) {
         touchDistance = -touchDistance;
@@ -350,7 +359,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     VLDContextSheetItemView *itemView = [self itemViewForTouchVector: touchVector];
     CGFloat touchDistance = [self signedTouchDistanceForTouchVector: touchVector itemView: itemView];
     
-//    if(fabs(touchDistance) <= VLDMaxTouchDistanceAllowance) {
+//    if(fabs(touchDistance) <= VLDTouchDistanceAllowance) {
 //        self.centerView.center = CGPointMake(self.touchCenter.x + touchVector.x, self.touchCenter.y + touchVector.y);
 //        [self setCenterViewHighlighted: YES];
 //    }
@@ -369,7 +378,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 //                         completion: nil];
 //    }
     
-    if(touchDistance > self.radius + VLDMaxTouchDistanceAllowance) {
+    if(touchDistance > (self.radius + VLDTouchDistanceAllowance)) { // touch is getting too far from the item, so we have to unhighlight it
         if(itemView.isHighlighted) {
             [self.delegate contextSheet:self willUnhighlightItemView:itemView withGestureRecognizer:gestureRecognizer];
         }
@@ -383,15 +392,17 @@ static CGFloat VLDVectorLength(CGPoint vector) {
                          }
                          completion: nil];
         
+        // make the item back to its normal size
         [self updateItemView: itemView
                touchDistance: 0.0
                     animated: YES];
         
-        self.selectedItemView = nil;
-        
-        return;
+        //self.selectedItemView = nil;
+        //
+        //return;
     }
     
+    // unhighlight selectedItemView
     if(itemView != self.selectedItemView) {
         if(self.selectedItemView && self.selectedItemView.isHighlighted) {
             [self.delegate contextSheet:self willUnhighlightItemView:self.selectedItemView withGestureRecognizer:gestureRecognizer];
@@ -422,20 +433,20 @@ static CGFloat VLDVectorLength(CGPoint vector) {
                     animated: NO];
     }
     
-    if(itemView != nil && fabs(touchDistance) > VLDMaxTouchDistanceAllowance) {
+    // touch distance is in range to target the itemView
+    if(itemView != nil && (fabs(touchDistance) > (self.radius-VLDTouchDistanceAllowance/2.) &&  fabs(touchDistance) < (self.radius+VLDTouchDistanceAllowance/2.))) {
         if(itemView.isHighlighted == NO) {
             [itemView setHighlighted: YES animated: YES];
             [self.delegate contextSheet:self didHighlightItemView:itemView withGestureRecognizer:gestureRecognizer];
+            
+            [UIView animateWithDuration: 0.3
+                                  delay: 0.0
+                                options: UIViewAnimationOptionCurveEaseInOut
+                             animations:^{
+                                 self.selectedItemTitleLabel.alpha = 1.;
+                             }
+                             completion: nil];
         }
-        
-        [UIView animateWithDuration: 0.3
-                              delay: 0.0
-                            options: UIViewAnimationOptionCurveEaseInOut
-                         animations:^{
-                             self.selectedItemTitleLabel.alpha = 1.;
-                         }
-                         completion: nil];
-
     }
     
     self.selectedItemView = itemView;
@@ -456,7 +467,8 @@ static CGFloat VLDVectorLength(CGPoint vector) {
         CGFloat cosOfAngle = VLDVectorDotProduct(itemViewVector, touchVector) / (VLDVectorLength(itemViewVector)*VLDVectorLength(touchVector));
         
         // so here we basically are looking for the itemViewVector that is the "most near" touchVector.
-        if(cosOfAngle > maxCosOfAngle && cosOfAngle > 0.85) { // AH: i've added a "cosOfAngle > 0.85 filter" because I want the user to be pointing to the itemView quite correctly (itemView should only appear selected if it's correctly pointed to)
+#define MINIMUM_COS_ANGLE_THRESHOLD 0.55
+        if(cosOfAngle > maxCosOfAngle && cosOfAngle >= MINIMUM_COS_ANGLE_THRESHOLD) { // AH: i've added a "cosOfAngle > X filter" because I want the user to be pointing to the itemView quite correctly (itemView should only appear selected if it's correctly pointed to)
             maxCosOfAngle = cosOfAngle;
             resultItemView = itemView;
         }

@@ -40,6 +40,10 @@
 
 - (void) startWithGestureRecognizer: (UIGestureRecognizer *) gestureRecognizer
                              inView: (UIView *) view;
+
+- (void)pauseGestureRecognizerHandling; // does not stop gesture recognizer itself, but removes the VLDContextSheet as a target.
+- (void)resumeGestureRecognizerHandling; // adds the VLDContextSheet as a target to the gesture recognizer.
+
 - (void) end;
 
 @end
