@@ -248,7 +248,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 }
 
 - (void) closeItemsToCenterView {
-    [UIView animateWithDuration: 0.1
+    [UIView animateWithDuration: 0.25
                           delay: 0.0
                         options: UIViewAnimationOptionCurveEaseInOut
                      animations:^{
@@ -320,16 +320,12 @@ static CGFloat VLDVectorLength(CGPoint vector) {
             }
         }
         else { // user lift finger outside of an item, so he wants to cancel
-            BOOL canEnd = (self.delegate == nil || (self.delegate && [self.delegate contextSheetShouldCancel:self withGestureRecognizer:gestureRecognizer]));
-            if(canEnd) {
-                [self end];
-                [self.delegate contextSheetDidCancel:self];
-            }
+            [self end];
+            [self.delegate contextSheetDidCancel:self];
         }
     }
     else if(gestureRecognizer.state == UIGestureRecognizerStateCancelled) { // also UIGestureRecognizerStateFailed?
         self.selectedItemView = nil;
-        [self.delegate contextSheetShouldCancel:self withGestureRecognizer:gestureRecognizer]; // will always cancel if gesture state is UIGestureRecognizerStateCancelled, whatever the response is!
         [self end];
         [self.delegate contextSheetDidCancel:self];
     }
@@ -378,13 +374,14 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 //                         completion: nil];
 //    }
     
+    BOOL itemViewUpdated = NO;
     if(touchDistance > (self.radius + VLDTouchDistanceAllowance)) { // touch is getting too far from the item, so we have to unhighlight it
         if(itemView.isHighlighted) {
             [self.delegate contextSheet:self willUnhighlightItemView:itemView withGestureRecognizer:gestureRecognizer];
         }
         [itemView setHighlighted: NO animated: YES];
         
-        [UIView animateWithDuration: 0.3
+        [UIView animateWithDuration: 0.25
                               delay: 0.0
                             options: UIViewAnimationOptionCurveEaseInOut
                          animations:^{
@@ -396,6 +393,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
         [self updateItemView: itemView
                touchDistance: 0.0
                     animated: YES];
+        itemViewUpdated = YES;
         
         //self.selectedItemView = nil;
         //
@@ -409,7 +407,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
         }
         [self.selectedItemView setHighlighted: NO animated: YES];
         
-        [UIView animateWithDuration: 0.3
+        [UIView animateWithDuration: 0.25
                               delay: 0.0
                             options: UIViewAnimationOptionCurveEaseInOut
                          animations:^{
@@ -421,16 +419,18 @@ static CGFloat VLDVectorLength(CGPoint vector) {
                touchDistance: 0.0
                     animated: YES];
         
-        [self updateItemView: itemView
-               touchDistance: touchDistance
-                    animated: YES];
+        if(itemViewUpdated == NO) {
+            [self updateItemView: itemView
+                   touchDistance: touchDistance
+                        animated: YES];
+        }
         
         [self bringSubviewToFront: itemView];
     }
-    else  {
+    else if(itemViewUpdated == NO) {
         [self updateItemView: itemView
                touchDistance: touchDistance
-                    animated: NO];
+                    animated: YES];
     }
     
     // touch distance is in range to target the itemView
@@ -439,7 +439,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
             [itemView setHighlighted: YES animated: YES];
             [self.delegate contextSheet:self didHighlightItemView:itemView withGestureRecognizer:gestureRecognizer];
             
-            [UIView animateWithDuration: 0.3
+            [UIView animateWithDuration: 0.25
                                   delay: 0.0
                                 options: UIViewAnimationOptionCurveEaseInOut
                              animations:^{
@@ -486,11 +486,8 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 
 -(void)endContextSheetByTap:(id)sender // user tapped in the background view, so he wants to cancel
 {
-    BOOL canEnd = (self.delegate == nil || (self.delegate && [self.delegate contextSheetShouldCancel:self withGestureRecognizer:sender]));
-    if(canEnd) {
-        [self end];
-        [self.delegate contextSheetDidCancel:self];
-    }
+    [self end];
+    [self.delegate contextSheetDidCancel:self];
 }
 
 @end

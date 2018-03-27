@@ -17,7 +17,6 @@
 -(void)contextSheet:(VLDContextSheet *)contextSheet willUnhighlightItemView:(VLDContextSheetItemView*)itemView withGestureRecognizer:(UIGestureRecognizer*)gestureRecognizer;
 -(void)contextSheet:(VLDContextSheet *)contextSheet didSelectItemView:(VLDContextSheetItemView*)itemView;
 
--(BOOL)contextSheetShouldCancel:(VLDContextSheet *)contextSheet withGestureRecognizer:(UIGestureRecognizer*)gestureRecognizer; // will always cancel, whatever delegate response is, if the gesture state is UIGestureRecognizerStateCancelled!
 -(void)contextSheetDidCancel:(VLDContextSheet *)contextSheet;
 
 
