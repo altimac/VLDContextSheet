@@ -25,6 +25,7 @@
 @interface VLDContextSheet : UIView
 
 @property (strong, nonatomic) UILabel *selectedItemTitleLabel; // displays the selected sheet item label
+@property (strong, readonly, nonatomic) UIView *backgroundView;
 
 @property (assign, nonatomic) NSInteger radius;
 @property (assign, nonatomic) CGFloat rotation;

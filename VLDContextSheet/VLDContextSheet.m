@@ -38,7 +38,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 
 @property (strong, nonatomic) NSArray *itemViews;
 //@property (strong, nonatomic) UIView *centerView;
-@property (strong, nonatomic) UIView *backgroundView;
+@property (strong, readwrite, nonatomic) UIView *backgroundView;
 @property (strong, nonatomic) VLDContextSheetItemView *selectedItemView;
 @property (assign, nonatomic) BOOL openAnimationFinished;
 @property (assign, nonatomic) CGPoint touchCenter;
