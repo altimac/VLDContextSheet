@@ -15,16 +15,16 @@ typedef struct {
 } VLDZone;
 
 static const NSInteger VLDTouchDistanceAllowance = 60; // a distance around each item center where we consider the touch to be in the item sensitive area. Typically it defines the radius of a circle  around each item center we consider the item is targeted.
-static const NSInteger VLDZonesCount = 10;
-
-static inline VLDZone VLDZoneMake(CGRect rect, CGFloat rotation) {
-    VLDZone zone;
-    
-    zone.rect = rect;
-    zone.rotation = rotation;
-    
-    return zone;
-}
+//static const NSInteger VLDZonesCount = 10;
+//
+//static inline VLDZone VLDZoneMake(CGRect rect, CGFloat rotation) {
+//    VLDZone zone;
+//
+//    zone.rect = rect;
+//    zone.rotation = rotation;
+//
+//    return zone;
+//}
 
 static CGFloat VLDVectorDotProduct(CGPoint vector1, CGPoint vector2) { // math reminder: the dot product (produit scalaire in french) is equal to: cos(alpha) * ||v1->|| * ||v2->|| but is also equal to v1.x*v2.x+v1.y*v2.y. It helps know the angle (alpha) between 2 vectors. If cos(alpha) is close to 1, it means the 2 vectors have "very near" (points to the same direction).
     return vector1.x * vector2.x + vector1.y * vector2.y;
@@ -48,7 +48,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 
 @implementation VLDContextSheet {
     
-    VLDZone zones[VLDZonesCount];
+//    VLDZone zones[VLDZonesCount];
 }
 
 - (id) initWithFrame: (CGRect) frame {
@@ -146,44 +146,44 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 //    _centerView.backgroundColor = highlighted ? [UIColor colorWithWhite: 0.5 alpha: 0.4] : nil;
 //}
 
-- (void) createZones {
-    CGRect screenRect = self.bounds;
-    
-    NSInteger rowHeight1 = self.itemSize.height + self.radius;
-    
-    zones[0] = VLDZoneMake(CGRectMake(0, 0, 70, rowHeight1), 0.8);
-    zones[1] = VLDZoneMake(CGRectMake(zones[0].rect.size.width, 0, 40, rowHeight1), 0.4);
-    
-    zones[2] = VLDZoneMake(CGRectMake(zones[1].rect.origin.x + zones[1].rect.size.width, 0, screenRect.size.width - 2 *(zones[0].rect.size.width + zones[1].rect.size.width), rowHeight1), 0);
-    
-    zones[3] = VLDZoneMake(CGRectMake(zones[2].rect.origin.x + zones[2].rect.size.width, 0, zones[1].rect.size.width, rowHeight1),  -zones[1].rotation);
-    zones[4] = VLDZoneMake(CGRectMake(zones[3].rect.origin.x + zones[3].rect.size.width, 0, zones[0].rect.size.width, rowHeight1), -zones[0].rotation);
-    
-    NSInteger rowHeight2 = screenRect.size.height - zones[0].rect.size.height;
-    
-    zones[5] = VLDZoneMake(CGRectMake(0, zones[0].rect.size.height, zones[0].rect.size.width, rowHeight2), M_PI - zones[0].rotation);
-    zones[6] = VLDZoneMake(CGRectMake(zones[5].rect.size.width, zones[5].rect.origin.y, zones[1].rect.size.width, rowHeight2), M_PI - zones[1].rotation);
-    zones[7] = VLDZoneMake(CGRectMake(zones[6].rect.origin.x + zones[6].rect.size.width, zones[5].rect.origin.y, zones[2].rect.size.width, rowHeight2), M_PI - zones[2].rotation);
-    zones[8] = VLDZoneMake(CGRectMake(zones[7].rect.origin.x + zones[7].rect.size.width, zones[5].rect.origin.y, zones[3].rect.size.width, rowHeight2), M_PI - zones[3].rotation);
-    zones[9] = VLDZoneMake(CGRectMake(zones[8].rect.origin.x + zones[8].rect.size.width, zones[5].rect.origin.y, zones[4].rect.size.width, rowHeight2), M_PI - zones[4].rotation);
-    
-    //[self drawZones];
-}
-
-/* Only used for testing the touch zones */
-- (void) drawZones {
-    for(int i = 0; i < VLDZonesCount; i++) {
-        UIView *zoneView = [[UIView alloc] initWithFrame: zones[i].rect];
-        
-        CGFloat hue = ( arc4random() % 256 / 256.0 );
-        CGFloat saturation = ( arc4random() % 128 / 256.0 ) + 0.5;
-        CGFloat brightness = ( arc4random() % 128 / 256.0 ) + 0.5;
-        UIColor *color = [UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:1];
-        
-        zoneView.backgroundColor = color;
-        [self addSubview: zoneView];
-    }
-}
+//- (void) createZones {
+//    CGRect screenRect = self.bounds;
+//
+//    NSInteger rowHeight1 = self.itemSize.height + self.radius;
+//
+//    zones[0] = VLDZoneMake(CGRectMake(0, 0, 70, rowHeight1), 0.8);
+//    zones[1] = VLDZoneMake(CGRectMake(zones[0].rect.size.width, 0, 40, rowHeight1), 0.4);
+//
+//    zones[2] = VLDZoneMake(CGRectMake(zones[1].rect.origin.x + zones[1].rect.size.width, 0, screenRect.size.width - 2 *(zones[0].rect.size.width + zones[1].rect.size.width), rowHeight1), 0);
+//
+//    zones[3] = VLDZoneMake(CGRectMake(zones[2].rect.origin.x + zones[2].rect.size.width, 0, zones[1].rect.size.width, rowHeight1),  -zones[1].rotation);
+//    zones[4] = VLDZoneMake(CGRectMake(zones[3].rect.origin.x + zones[3].rect.size.width, 0, zones[0].rect.size.width, rowHeight1), -zones[0].rotation);
+//
+//    NSInteger rowHeight2 = screenRect.size.height - zones[0].rect.size.height;
+//
+//    zones[5] = VLDZoneMake(CGRectMake(0, zones[0].rect.size.height, zones[0].rect.size.width, rowHeight2), M_PI - zones[0].rotation);
+//    zones[6] = VLDZoneMake(CGRectMake(zones[5].rect.size.width, zones[5].rect.origin.y, zones[1].rect.size.width, rowHeight2), M_PI - zones[1].rotation);
+//    zones[7] = VLDZoneMake(CGRectMake(zones[6].rect.origin.x + zones[6].rect.size.width, zones[5].rect.origin.y, zones[2].rect.size.width, rowHeight2), M_PI - zones[2].rotation);
+//    zones[8] = VLDZoneMake(CGRectMake(zones[7].rect.origin.x + zones[7].rect.size.width, zones[5].rect.origin.y, zones[3].rect.size.width, rowHeight2), M_PI - zones[3].rotation);
+//    zones[9] = VLDZoneMake(CGRectMake(zones[8].rect.origin.x + zones[8].rect.size.width, zones[5].rect.origin.y, zones[4].rect.size.width, rowHeight2), M_PI - zones[4].rotation);
+//
+//    //[self drawZones];
+//}
+//
+///* Only used for testing the touch zones */
+//- (void) drawZones {
+//    for(int i = 0; i < VLDZonesCount; i++) {
+//        UIView *zoneView = [[UIView alloc] initWithFrame: zones[i].rect];
+//
+//        CGFloat hue = ( arc4random() % 256 / 256.0 );
+//        CGFloat saturation = ( arc4random() % 128 / 256.0 ) + 0.5;
+//        CGFloat brightness = ( arc4random() % 128 / 256.0 ) + 0.5;
+//        UIColor *color = [UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:1];
+//
+//        zoneView.backgroundColor = color;
+//        [self addSubview: zoneView];
+//    }
+//}
 
 - (void) updateItemView: (UIView *) itemView
           touchDistance: (CGFloat) touchDistance
@@ -270,7 +270,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     else {
         self.frame = view.bounds;
     }
-    [self createZones];
+    //[self createZones];
     
     self.starterGestureRecognizer = gestureRecognizer;
     
@@ -278,7 +278,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     //self.centerView.center = self.touchCenter;
     self.selectedItemView = nil;
     //[self setCenterViewHighlighted: YES];
-    self.rotation = [self rotationForCenter: self.touchCenter];
+    self.rotation = M_PI/*[self rotationForCenter: self.touchCenter]*/;
     
     [self openItemsFromCenterView];
     
@@ -296,17 +296,17 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 }
 
 
-- (CGFloat) rotationForCenter: (CGPoint) center {
-    for(NSInteger i = 0; i < VLDZonesCount; i++) {
-        VLDZone zone = zones[i];
-        
-        if(CGRectContainsPoint(zone.rect, center)) {
-            return zone.rotation;
-        }
-    }
-    
-    return 0;
-}
+//- (CGFloat) rotationForCenter: (CGPoint) center {
+//    for(NSInteger i = 0; i < VLDZonesCount; i++) {
+//        VLDZone zone = zones[i];
+//        
+//        if(CGRectContainsPoint(zone.rect, center)) {
+//            return zone.rotation;
+//        }
+//    }
+//    
+//    return 0;
+//}
 
 - (void) gestureRecognizedStateObserver: (UIGestureRecognizer *) gestureRecognizer {
     if(self.openAnimationFinished && gestureRecognizer.state == UIGestureRecognizerStateChanged) {
