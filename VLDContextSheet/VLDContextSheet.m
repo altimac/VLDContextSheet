@@ -208,7 +208,7 @@ static CGFloat VLDVectorLength(CGPoint vector) {
 
 - (void) updateItemView: (UIView *) itemView touchDistance: (CGFloat) touchDistance  {
     NSInteger itemIndex = [self.itemViews indexOfObject: itemView];
-    CGFloat angle = /*-0.65*/M_PI_2 + self.rotation + itemIndex * (self.rangeAngle / self.itemViews.count);
+    CGFloat angle = /*-0.65*/0 + self.rotation + itemIndex * (self.rangeAngle / self.itemViews.count);
     //CGFloat resistanceFactor = 1.0 / (touchDistance > 0 ? 6.0 : 3.0);
     //itemView.center = CGPointMake(self.touchCenter.x + (self.radius + touchDistance * resistanceFactor) * sin(angle), self.touchCenter.y + (self.radius + touchDistance * resistanceFactor) * cos(angle));
     itemView.center = CGPointMake(self.touchCenter.x + self.radius*sin(angle), self.touchCenter.y + self.radius*cos(angle));
