@@ -48,7 +48,7 @@ static const NSInteger VLDTextPadding = 5;
     
     _label = [[UILabel alloc] init];
     _label.clipsToBounds = YES;
-    _label.font = [UIFont systemFontOfSize: 10];
+    _label.font = [UIFont systemFontOfSize: 12];
     _label.textAlignment = NSTextAlignmentCenter;
     _label.layer.cornerRadius = 7;
     _label.backgroundColor = [UIColor colorWithWhite: 0.0 alpha: 0.4];
@@ -62,7 +62,7 @@ static const NSInteger VLDTextPadding = 5;
     
     self.imageView.frame = CGRectMake(0, (self.frame.size.height - self.frame.size.width) / 2, self.frame.size.width, self.frame.size.width);
     self.highlightedImageView.frame = self.imageView.frame;
-    self.label.frame = CGRectMake((self.frame.size.width - self.labelWidth) / 2.0, 0, self.labelWidth, 14);
+    self.label.frame = CGRectMake((self.frame.size.width - self.labelWidth) / 2.0, 0, self.labelWidth, 16);
 }
 
 - (void) setItem:(VLDContextSheetItem *)item {
@@ -112,8 +112,14 @@ static const NSInteger VLDTextPadding = 5;
                      animations:^{
                          self.highlightedImageView.alpha = (highlighted ? 1.0 : 0.0);
                          self.imageView.alpha = 1 - self.highlightedImageView.alpha;
-                         if(self.titleLabelIsHidden == NO) {
+                         if(_titleLabelIsAlwaysVisible == YES) {
+                             self.label.alpha = 1;
+                         }
+                         else if(self.titleLabelIsHidden == NO) {
                              self.label.alpha = self.highlightedImageView.alpha;
+                         }
+                         else {
+                             self.label.alpha = 0;
                          }
                          
                      }
@@ -127,5 +133,18 @@ static const NSInteger VLDTextPadding = 5;
         [self setHighlighted:self.isHighlighted animated:NO];
     }
 }
+
+-(void)setTitleLabelIsAlwaysVisible:(BOOL)titleLabelIsAlwaysVisible
+{
+    _titleLabelIsAlwaysVisible = titleLabelIsAlwaysVisible;
+    if(_titleLabelIsAlwaysVisible == YES) {
+        self.label.alpha = 1.;
+    }
+    else {
+        self.label.alpha = 0;
+        [self setHighlighted:self.isHighlighted animated:NO];
+    }
+}
+
 
 @end

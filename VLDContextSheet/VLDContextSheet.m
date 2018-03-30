@@ -113,7 +113,8 @@ static CGFloat VLDVectorLength(CGPoint vector) {
     
     for(VLDContextSheetItem *item in _items) {
         VLDContextSheetItemView *itemView = [[VLDContextSheetItemView alloc] initWithFrame:CGRectMake(0, 0, self.itemSize.width, self.itemSize.height)];
-        itemView.titleLabelIsHidden = YES; // use global, big selectedItemTitleLabel instead of per item labels.
+        //itemView.titleLabelIsHidden = YES; // use global, big selectedItemTitleLabel instead of per item labels.
+        itemView.titleLabelIsAlwaysVisible = YES; // we want the item title to always be visible
         itemView.item = item;
         
         [self addSubview: itemView];
@@ -443,7 +444,9 @@ static CGFloat VLDVectorLength(CGPoint vector) {
                                   delay: 0.0
                                 options: UIViewAnimationOptionCurveEaseInOut
                              animations:^{
-                                 self.selectedItemTitleLabel.alpha = 1.;
+                                 if(_displaysSelectedItemTitleLabelAtTop == YES) {
+                                     self.selectedItemTitleLabel.alpha = 1.;
+                                 }
                              }
                              completion: nil];
         }

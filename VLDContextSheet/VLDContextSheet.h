@@ -24,6 +24,7 @@
 
 @interface VLDContextSheet : UIView
 
+@property (assign, nonatomic) BOOL displaysSelectedItemTitleLabelAtTop; // defaults to NO. If YES, displays the selected/highlighted item title in a label at the top of the ContextSheet
 @property (strong, nonatomic) UILabel *selectedItemTitleLabel; // displays the selected sheet item label
 @property (strong, readonly, nonatomic) UIView *backgroundView;
 
